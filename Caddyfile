@@ -1,4 +1,4 @@
-callback.otoneso.pl {
+callback.viaregia.online {
 	encode gzip
 	reverse_proxy app:3000
 }

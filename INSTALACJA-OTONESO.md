@@ -16,9 +16,9 @@ Przycisk **Otwórz panel** we wtyczce loguje do panelu bez hasła. Tam są leady
 
 ## Jednorazowo: serwer Callback (robi to właściciel platformy, czyli Ty)
 
-Wtyczka łączy się z serwerem `https://callback.otoneso.pl`. Trzeba go postawić raz, dla wszystkich stron i klientów.
+Wtyczka łączy się z serwerem `https://callback.viaregia.online`. Trzeba go postawić raz, dla wszystkich stron i klientów.
 
-1. VPS z Dockerem (np. Hetzner CX22) i rekord DNS `A`: `callback.otoneso.pl` → IP serwera.
+1. VPS z Dockerem (np. Hetzner CX22) i rekord DNS `A`: `callback.viaregia.online` → IP serwera.
 2. Na serwerze:
    ```bash
    cp .env.example .env     # ustaw ADMIN_PASSWORD, PUBLIC_URL, CONTACT_EMAIL, dane Twilio
@@ -27,14 +27,14 @@ Wtyczka łączy się z serwerem `https://callback.otoneso.pl`. Trzeba go postawi
 3. Twilio (prawdziwe połączenia): konto, numer (polski wymaga Regulatory Bundle z danymi firmy), w *Voice → Geo permissions* włączona Polska, dane w `.env`.
 
 Adresy po uruchomieniu:
-- `https://callback.otoneso.pl` – landing page produktu (z działającym widgetem),
-- `https://callback.otoneso.pl/app/` – panel klienta (rejestracja i logowanie),
-- `https://callback.otoneso.pl/admin/` – Twój panel: wszyscy klienci, ich plany i leady.
+- `https://callback.viaregia.online` – landing page produktu (z działającym widgetem),
+- `https://callback.viaregia.online/app/` – panel klienta (rejestracja i logowanie),
+- `https://callback.viaregia.online/admin/` – Twój panel: wszyscy klienci, ich plany i leady.
 
 Wtyczkę pobieraj zawsze z landing page (przycisk „Pobierz wtyczkę”). Serwer wpisuje w nią swój adres automatycznie, więc działa z każdą domeną.
 
 ### Wdrożenie bez własnego serwera
-- **Railway:** New Project → Deploy from GitHub repo (plik `railway.json` jest gotowy) → dodaj Volume zamontowany w `/data` → zmienne z `.env.example` → własna domena `callback.otoneso.pl`.
+- **Railway:** New Project → Deploy from GitHub repo (plik `railway.json` jest gotowy) → dodaj Volume zamontowany w `/data` → zmienne z `.env.example` → własna domena `callback.viaregia.online`.
 - **Render:** New → Blueprint → repozytorium (plik `render.yaml` jest gotowy, dysk na dane tworzy się sam).
 
 ## Bez WordPressa

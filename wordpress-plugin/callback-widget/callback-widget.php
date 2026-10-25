@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
 
 // Adres serwera Callback (wpisywany automatycznie przy pobieraniu wtyczki z serwera).
 if (!defined('CBW_SERVER')) {
-    define('CBW_SERVER', 'https://callback.otoneso.pl');
+    define('CBW_SERVER', 'https://callback.viaregia.online');
 }
 const CBW_OPTION = 'cbw_settings';
 
