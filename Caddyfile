@@ -1,0 +1,4 @@
+callback.otoneso.pl {
+	encode gzip
+	reverse_proxy app:3000
+}

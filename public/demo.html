@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Podgląd widgetu</title>
+<style>
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f4f4f6;color:#111118}
+  header{background:#050506;color:#fff;padding:20px 24px;font-weight:700}
+  main{max-width:760px;margin:40px auto;padding:0 16px;line-height:1.6}
+  .box{background:#fff;border:1px solid #e4e4ea;border-radius:16px;padding:24px;margin-bottom:16px}
+  code{background:#f1f5f9;padding:2px 6px;border-radius:4px}
+</style>
+</head>
+<body>
+<header>Przykładowa strona klienta</header>
+<main>
+  <div class="box">
+    <h1>Podgląd widgetu oddzwaniania</h1>
+    <p>Kliknij słuchawkę w rogu ekranu, wpisz numer i wyślij. Lead pojawi się w panelu. W trybie DEMO rozmowa jest symulowana i po kilku sekundach dostaje status.</p>
+    <p>Aby zobaczyć <b>exit intent</b>, wyjedź kursorem poza górną krawędź okna (raz na sesję).</p>
+  </div>
+  <div class="box"><p>Treść strony…</p><p style="height:800px"></p></div>
+</main>
+<script>
+  (function () {
+    var key = new URLSearchParams(location.search).get('site');
+    if (!key) { document.querySelector('h1').textContent = 'Brak parametru ?site=KLUCZ'; return; }
+    var s = document.createElement('script');
+    s.src = '/widget.js'; s.async = true; s.setAttribute('data-site', key);
+    document.body.appendChild(s);
+  })();
+</script>
+</body>
+</html>

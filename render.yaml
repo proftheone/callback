@@ -1,0 +1,24 @@
+# Wdrożenie na Render.com: New → Blueprint → wskaż repozytorium z tym plikiem.
+services:
+  - type: web
+    name: callback
+    runtime: docker
+    plan: starter
+    healthCheckPath: /health
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: PUBLIC_URL
+        sync: false
+      - key: CONTACT_EMAIL
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_NUMBER
+        sync: false
