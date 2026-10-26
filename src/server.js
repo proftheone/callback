@@ -84,7 +84,7 @@ function isAdmin(req) {
   return crypto.timingSafeEqual(a, b);
 }
 
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon' };
 
 function serveStatic(res, rel) {
   const file = path.normalize(path.join(PUBLIC_DIR, rel));
@@ -107,6 +107,8 @@ function publicConfig(site) {
     offHoursTitle: s.offHoursTitle, offHoursSubtitle: s.offHoursSubtitle,
     thankYou: s.thankYou, thankYouScheduled: s.thankYouScheduled,
     autoOpenSeconds: s.autoOpenSeconds, exitIntent: s.exitIntent, exitIntentTitle: s.exitIntentTitle,
+    teaser: s.teaser, teaserDelay: s.teaserDelay, teaserGreeting: s.teaserGreeting, teaserText: s.teaserText,
+    avatarUrl: s.avatarUrl,
     slots: availableSlots(s, { days: 7 }).slice(0, 80),
   };
 }

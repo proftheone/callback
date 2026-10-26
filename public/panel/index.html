@@ -426,6 +426,10 @@
         f('Nagłówek', 'title', st.title, '', true) + f('Podtytuł', 'subtitle', st.subtitle, '', true) + f('Przycisk', 'buttonText', st.buttonText, '', true) +
         f('Nagłówek poza godzinami', 'offHoursTitle', st.offHoursTitle, '', true) + f('Podtytuł poza godzinami', 'offHoursSubtitle', st.offHoursSubtitle, '', true) +
         f('Nagłówek exit intent', 'exitIntentTitle', st.exitIntentTitle, '', true) +
+        '<label>Dymek przy słuchawce</label><input type="checkbox" data-k="teaser"' + (st.teaser !== false ? ' checked' : '') + '>' +
+        f('Dymek: powitanie', 'teaserGreeting', st.teaserGreeting, '', true) + f('Dymek: tekst', 'teaserText', st.teaserText, '', true) +
+        f('Dymek: pokaż po (s)', 'teaserDelay', st.teaserDelay, 'number', true) +
+        f('Zdjęcie konsultanta (adres URL, puste = domyślne)', 'avatarUrl', st.avatarUrl || '', 'url', true) +
         f('Podziękowanie', 'thankYou', st.thankYou, '', true) + f('Podziękowanie (termin)', 'thankYouScheduled', st.thankYouScheduled, '', true) +
         f('Komunikat dla konsultanta', 'agentGreeting', st.agentGreeting, '', true) +
         '</div></div></div>' +

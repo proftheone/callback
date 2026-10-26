@@ -98,6 +98,12 @@ const DEFAULT_SETTINGS = {
   autoOpenSeconds: 0,      // 0 = wyłączone
   exitIntent: true,
   exitIntentTitle: 'Zanim wyjdziesz… oddzwonimy w 30 sekund!',
+  // dymek z konsultantem przy słuchawce
+  teaser: true,
+  teaserDelay: 3,          // sekundy od wejścia na stronę
+  teaserGreeting: 'Cześć',
+  teaserText: 'Masz pytanie? Oddzwonimy do Ciebie w 30 sekund!',
+  avatarUrl: '',           // puste = domyślna grafika konsultanta
   maxAttempts: 2,
   recordCalls: false,
   agentGreeting: 'Klient ze strony prosi o kontakt. Łączę.',
