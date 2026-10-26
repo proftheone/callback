@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Callback – oddzwanianie w 30 sekund
  * Description: Widget „Zadzwonimy do Ciebie w 30 sekund”. Wpisz numer telefonu, kliknij „Włącz widget” i gotowe.
- * Version: 2.0.0
+ * Version: 2.0.1
  * Requires PHP: 7.4
  * License: GPLv2 or later
  */

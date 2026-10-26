@@ -31,7 +31,7 @@ Kod do wklejenia na stronę znajdziesz w panelu w zakładce „Strony i ustawien
 
 ## Wdrożenie
 - `docker compose up -d` uruchamia aplikację + Caddy (automatyczny HTTPS). Domenę ustawiasz w `Caddyfile`.
-- Instalacja: **[INSTALACJA-OTONESO.md](INSTALACJA-OTONESO.md)**.
+- Instalacja: **[INSTALACJA-WORDPRESS.md](INSTALACJA-WORDPRESS.md)**.
 - Wtyczka WordPress: `wordpress-plugin/callback-widget.zip`.
 
 ## Podłączenie Twilio
