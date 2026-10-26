@@ -1,6 +1,6 @@
 'use strict';
 // Logika połączeń: najpierw dzwonimy do konsultanta, po odebraniu łączymy go z klientem.
-// Bez danych Twilio aplikacja działa w trybie DEMO (symuluje rozmowy).
+// Bez danych Twilio aplikacja nie dzwoni: zgłoszenia zostają ze statusem „new”.
 const crypto = require('node:crypto');
 const { leads } = require('./db');
 
@@ -30,14 +30,18 @@ async function notifyWebhook(site, lead, event) {
 }
 
 async function startCall(lead, site) {
+  // Bez Twilio nie dzwonimy i nie wymyślamy wyniku: zgłoszenie czeka jako „Nowe”
+  // (zaplanowane przechodzi w „Nowe”, gdy nadejdzie jego termin).
+  if (mockMode) {
+    if (lead.status !== 'new') leads.update(lead.id, { status: 'new' });
+    return;
+  }
   const attempts = lead.attempts + 1;
-  if (!site.agent_phone && !mockMode) {
+  if (!site.agent_phone) {
     leads.update(lead.id, { status: 'failed', notes: appendNote(lead, 'Brak numeru konsultanta w ustawieniach strony.') });
     return;
   }
   leads.update(lead.id, { status: 'calling', attempts, call_started_at: new Date().toISOString() });
-
-  if (mockMode) return simulate(lead.id, site);
 
   const params = new URLSearchParams({
     To: site.agent_phone,
@@ -122,22 +126,5 @@ function validSignature(url, params, signature) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-// Tryb DEMO: losowy wynik po kilku sekundach.
-function simulate(leadId, site) {
-  setTimeout(() => {
-    const lead = leads.byId(leadId);
-    if (!lead || lead.status !== 'calling') return;
-    const r = Math.random();
-    if (r < 0.75) {
-      const updated = leads.update(leadId, { status: 'completed', call_duration: 30 + Math.floor(Math.random() * 300) });
-      notifyWebhook(site, updated, 'call.finished');
-    } else if (r < 0.9) {
-      const updated = leads.update(leadId, { status: 'missed', notes: appendNote(lead, '[DEMO] Klient nie odebrał.') });
-      notifyWebhook(site, updated, 'call.finished');
-    } else {
-      scheduleRetry(lead, site, '[DEMO] Konsultant nie odebrał.');
-    }
-  }, 6000);
-}
 
 module.exports = { mockMode, startCall, agentAnswerTwiml, dialDone, callStatus, recording, validSignature, notifyWebhook, PUBLIC_URL };

@@ -502,6 +502,6 @@ if (!sites.list().some((s) => !s.account_id)) {
 
 server.listen(PORT, () => {
   console.log(`Callback działa: http://localhost:${PORT}  (landing: /, panel klienta: /app/, panel właściciela: /admin/)`);
-  if (tel.mockMode) console.log('TRYB DEMO: brak konfiguracji Twilio, połączenia są symulowane.');
+  if (tel.mockMode) console.log('TRYB DEMO: brak konfiguracji Twilio, zgłoszenia czekają jako „Nowe”, system nie dzwoni.');
   if (!process.env.ADMIN_PASSWORD) console.warn('UWAGA: ustaw ADMIN_PASSWORD w .env (teraz hasło to "admin").');
 });

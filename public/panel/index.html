@@ -116,7 +116,7 @@
     <button class="s" id="logout">Wyloguj</button>
   </header>
   <main>
-    <div id="mock" class="banner hide">Tryb DEMO: brak konfiguracji Twilio, połączenia są symulowane. Uzupełnij zmienne TWILIO_* w pliku .env, aby dzwonić naprawdę.</div>
+    <div id="mock" class="banner hide">Tryb bez dzwonienia: brak konfiguracji Twilio, nowe zgłoszenia mają status „Nowe”, oddzwoń ręcznie. Dodaj zmienne TWILIO_* w Render, aby system dzwonił sam.</div>
 
     <div id="onboarding" class="card hide" style="box-shadow:var(--glow)">
       <h3 style="margin-top:0">Pierwsze kroki: uruchom widget w 3 minuty</h3>
@@ -133,7 +133,7 @@
           <input id="q" placeholder="Szukaj numeru, imienia, notatki…" style="flex:1;min-width:200px">
           <select id="statusFilter">
             <option value="">Wszystkie statusy</option>
-            <option value="new">Nowy</option><option value="calling">Łączenie</option><option value="completed">Rozmowa odbyta</option>
+            <option value="new">Nowe</option><option value="calling">Łączenie</option><option value="completed">Rozmowa odbyta</option>
             <option value="scheduled">Zaplanowany</option><option value="missed">Klient nie odebrał</option>
             <option value="agent_missed">Konsultant nie odebrał</option><option value="failed">Błąd</option>
           </select>
@@ -217,7 +217,7 @@
   var state = { tab: 'leads', site: '', offset: 0, limit: 50, sites: [], currentLead: null, info: null };
   var PLAN_INFO = { free: ['Start', '0 zł', '1 strona, 50 leadów / mies.'], pro: ['Pro', '149 zł / mies.', '3 strony, 500 leadów / mies., nagrywanie rozmów'], business: ['Business', '399 zł / mies.', '20 stron, bez limitu leadów, API i webhooki'] };
   var $ = function (s) { return document.querySelector(s); };
-  var STATUS = { new: 'Nowy', calling: 'Łączenie', completed: 'Rozmowa odbyta', scheduled: 'Zaplanowany', missed: 'Klient nie odebrał', agent_missed: 'Konsultant nie odebrał', failed: 'Błąd' };
+  var STATUS = { new: 'Nowe', calling: 'Łączenie', completed: 'Rozmowa odbyta', scheduled: 'Zaplanowany', missed: 'Klient nie odebrał', agent_missed: 'Konsultant nie odebrał', failed: 'Błąd' };
   var DAYS = [[1, 'Poniedziałek'], [2, 'Wtorek'], [3, 'Środa'], [4, 'Czwartek'], [5, 'Piątek'], [6, 'Sobota'], [0, 'Niedziela']];
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function fmtDate(s) { return s ? new Date(s.includes('T') ? s : s.replace(' ', 'T') + 'Z').toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''; }

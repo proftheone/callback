@@ -10,7 +10,7 @@ Poza godzinami pracy klient wybiera termin, a rozmowa jest wykonywana automatycz
 - **Widget** (`public/widget.js`): pływająca słuchawka, panel z numerem, odliczanie 30 s, terminy poza godzinami pracy,
   exit intent, automatyczne otwarcie po X sekundach, motyw ciemny/jasny, kolor, pozycja, własne teksty. Shadow DOM, więc nie koliduje ze stylami strony.
 - **Telefonia** (`src/telephony.js`): Twilio (najpierw konsultant, potem klient), ponawianie gdy konsultant nie odbierze,
-  opcjonalne nagrywanie, weryfikacja podpisu webhooków. Bez kluczy Twilio działa **tryb DEMO** (symulowane rozmowy).
+  opcjonalne nagrywanie, weryfikacja podpisu webhooków. Bez kluczy Twilio aplikacja nie dzwoni, a zgłoszenia mają status **Nowe**.
 - **Panel admina** (`/admin/`): leady z filtrami i wyszukiwarką, tagi i notatki, ponowne połączenie, eksport CSV,
   statystyki (skuteczność, czas do połączenia, długość rozmów, źródła UTM, wyzwalacze), wiele stron (np. otoneso.pl, eprpilot.com).
 - **Integracje**: webhook JSON na każde zdarzenie (`lead.created`, `call.finished`, `call.missed`) do CRM / Zapier / Make.
