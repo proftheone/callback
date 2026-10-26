@@ -196,6 +196,8 @@
 <dialog id="leadDlg">
   <h3 style="margin-top:0" id="dlgTitle"></h3>
   <div id="dlgMeta" class="muted" style="margin-bottom:12px;line-height:1.6"></div>
+  <label class="muted">Status</label><br>
+  <select id="dlgStatus" style="width:100%;margin:4px 0 12px"></select>
   <label class="muted">Tag</label><br>
   <select id="dlgTag" style="width:100%;margin:4px 0 12px">
     <option value="">—</option><option>Nowa sprzedaż</option><option>Dosprzedaż</option><option>Reklamacja</option><option>Pytanie</option><option>Spam</option>
@@ -352,13 +354,14 @@
     $('#dlgMeta').innerHTML = 'Status: <b>' + (STATUS[l.status] || l.status) + '</b><br>Zgłoszenie: ' + fmtDate(l.created_at) +
       (l.page_url ? '<br>Strona: <a href="' + esc(l.page_url) + '" target="_blank">' + esc(l.page_url.slice(0, 70)) + '</a>' : '') +
       '<br>Wyzwalacz: ' + esc(l.trigger || 'button') + ' · Próby: ' + l.attempts;
+    $('#dlgStatus').innerHTML = Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (l.status === k ? ' selected' : '') + '>' + STATUS[k] + '</option>'; }).join('');
     $('#dlgTag').value = l.tag || '';
     $('#dlgNotes').value = l.notes || '';
     $('#leadDlg').showModal();
   }
   $('#dlgClose').addEventListener('click', function () { $('#leadDlg').close(); });
   $('#dlgSave').addEventListener('click', function () {
-    api('/api/admin/leads/' + state.currentLead.id, { method: 'PATCH', body: JSON.stringify({ tag: $('#dlgTag').value, notes: $('#dlgNotes').value }) })
+    api('/api/admin/leads/' + state.currentLead.id, { method: 'PATCH', body: JSON.stringify({ status: $('#dlgStatus').value, tag: $('#dlgTag').value, notes: $('#dlgNotes').value }) })
       .then(function () { $('#leadDlg').close(); loadLeads(); });
   });
   $('#dlgCall').addEventListener('click', function () {

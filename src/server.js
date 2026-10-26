@@ -414,6 +414,9 @@ route('PATCH', '/api/admin/leads/:id', panel(async (req, res, { id }, _, ctx) =>
   const b = await readBody(req);
   const allowed = {};
   for (const k of ['tag', 'notes', 'status']) if (b[k] !== undefined) allowed[k] = b[k];
+  if (allowed.status !== undefined && !['new', 'calling', 'completed', 'scheduled', 'missed', 'agent_missed', 'failed'].includes(allowed.status)) {
+    return send(res, 400, { error: 'Nieznany status' });
+  }
   send(res, 200, leads.update(Number(id), allowed));
 }));
 route('POST', '/api/admin/leads/:id/call', panel(async (req, res, { id }, _, ctx) => {
