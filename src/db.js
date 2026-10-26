@@ -92,6 +92,9 @@ const DEFAULT_SETTINGS = {
   offHoursSubtitle: 'Wybierz dogodny termin, a oddzwonimy.',
   thankYou: 'Dziękujemy! Właśnie łączymy rozmowę…',
   thankYouScheduled: 'Dziękujemy! Zadzwonimy w wybranym terminie.',
+  // false = bez ekranu „łączymy rozmowę” i bez przełącznika „Zadzwońcie teraz”
+  liveCall: false,
+  thankYouQueued: 'Dziękujemy! Oddzwonimy w ciągu 30 sekund.',
   timezone: 'Europe/Warsaw',
   // dzień tygodnia 0 = niedziela; null = nieczynne
   hours: { 1: ['09:00', '17:00'], 2: ['09:00', '17:00'], 3: ['09:00', '17:00'], 4: ['09:00', '17:00'], 5: ['09:00', '17:00'], 6: null, 0: null },

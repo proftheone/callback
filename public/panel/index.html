@@ -416,6 +416,7 @@
         '<label>Motyw</label><select data-k="theme"><option value="dark"' + (st.theme !== 'light' ? ' selected' : '') + '>Ciemny</option><option value="light"' + (st.theme === 'light' ? ' selected' : '') + '>Jasny</option></select>' +
         '<label>Pozycja</label><select data-k="position"><option value="right"' + (st.position === 'right' ? ' selected' : '') + '>Prawy dolny róg</option><option value="left"' + (st.position === 'left' ? ' selected' : '') + '>Lewy dolny róg</option></select>' +
         f('Auto-otwarcie po (s, 0 = wył.)', 'autoOpenSeconds', st.autoOpenSeconds, 'number', true) +
+        '<label>Połączenie na żywo („Zadzwońcie teraz”, odliczanie)</label><input type="checkbox" data-k="liveCall"' + (st.liveCall ? ' checked' : '') + '>' +
         '<label>Exit intent</label><input type="checkbox" data-k="exitIntent"' + (st.exitIntent ? ' checked' : '') + '>' +
         '<label>Nagrywaj rozmowy</label><input type="checkbox" data-k="recordCalls"' + (st.recordCalls ? ' checked' : '') + '>' +
         f('Liczba prób', 'maxAttempts', st.maxAttempts, 'number', true) +
@@ -431,6 +432,7 @@
         f('Dymek: pokaż po (s)', 'teaserDelay', st.teaserDelay, 'number', true) +
         f('Zdjęcie konsultanta (adres URL, puste = domyślne)', 'avatarUrl', st.avatarUrl || '', 'url', true) +
         f('Podziękowanie', 'thankYou', st.thankYou, '', true) + f('Podziękowanie (termin)', 'thankYouScheduled', st.thankYouScheduled, '', true) +
+        f('Podziękowanie (bez połączenia na żywo)', 'thankYouQueued', st.thankYouQueued, '', true) +
         f('Komunikat dla konsultanta', 'agentGreeting', st.agentGreeting, '', true) +
         '</div></div></div>' +
         '<div style="text-align:right;margin-top:16px"><button class="p" data-save>Zapisz ustawienia</button></div></div>';

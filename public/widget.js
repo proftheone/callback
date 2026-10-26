@@ -84,6 +84,7 @@
       '.timer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:44px;font-weight:800;letter-spacing:-.03em;font-variant-numeric:tabular-nums}' +
       '.timer small{font-size:12px;font-weight:600;color:' + t.muted + ';letter-spacing:0}' +
       '.center{text-align:center}' +
+      '.ok{width:72px;height:72px;border-radius:50%;margin:8px auto 18px;display:flex;align-items:center;justify-content:center;background:var(--c);box-shadow:0 12px 30px -8px var(--c)}' +
       '.hp{position:absolute;left:-9999px}' +
       '.tz{position:fixed;bottom:34px;' + side + ':104px;width:300px;max-width:calc(100vw - 128px);background:#fff;color:#111118;border-radius:22px;box-shadow:0 18px 50px -12px rgba(0,0,0,.35),0 0 0 1px rgba(0,0,0,.05);padding:16px 38px 16px 16px;display:none;align-items:center;gap:14px;cursor:pointer;animation:in .35s cubic-bezier(.2,.9,.3,1.2)}' +
       '.tz.show{display:flex}' +
@@ -136,7 +137,7 @@
         '<div class="err"></div>' +
         '<button class="submit" type="submit">' + esc(schedule ? 'Umów rozmowę' : cfg.buttonText) + '</button>' +
         '</form>' +
-        (cfg.open && cfg.slots.length ? '<button class="link">' + (schedule ? 'Zadzwońcie teraz' : 'Wolę inny termin') + '</button>' : '') +
+        (cfg.liveCall && cfg.open && cfg.slots.length ? '<button class="link">' + (schedule ? 'Zadzwońcie teraz' : 'Wolę inny termin') + '</button>' : '') +
         '<div class="consent">Zostawiając numer, zgadzasz się na jednorazowy kontakt telefoniczny w sprawie Twojego zapytania.</div>';
       if (schedule) { fillTimes(); root.querySelector('.day') && root.querySelector('.day').addEventListener('change', fillTimes); }
       var link = root.querySelector('.link');
@@ -166,6 +167,9 @@
         if (res.j.scheduled) {
           var when = new Date(res.j.scheduledAt).toLocaleString('pl-PL', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
           body.innerHTML = '<span class="pill off"><b></b>Rozmowa zaplanowana</span><h3>' + esc(cfg.thankYouScheduled) + '</h3><p>Termin: <b style="color:var(--c)">' + esc(when) + '</b></p>';
+        } else if (!cfg.liveCall) {
+          body.innerHTML = '<div class="center"><div class="ok"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>' +
+            '<h3 style="padding:0 20px">' + esc(cfg.thankYouQueued) + '</h3><p>Miej telefon pod ręką.</p></div>';
         } else {
           var C = 2 * Math.PI * 66;
           body.innerHTML = '<div class="center"><h3 style="padding:0 30px">' + esc(cfg.thankYou) + '</h3>' +

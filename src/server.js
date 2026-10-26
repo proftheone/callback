@@ -106,6 +106,7 @@ function publicConfig(site) {
     title: s.title, subtitle: s.subtitle, buttonText: s.buttonText,
     offHoursTitle: s.offHoursTitle, offHoursSubtitle: s.offHoursSubtitle,
     thankYou: s.thankYou, thankYouScheduled: s.thankYouScheduled,
+    liveCall: s.liveCall, thankYouQueued: s.thankYouQueued,
     autoOpenSeconds: s.autoOpenSeconds, exitIntent: s.exitIntent, exitIntentTitle: s.exitIntentTitle,
     teaser: s.teaser, teaserDelay: s.teaserDelay, teaserGreeting: s.teaserGreeting, teaserText: s.teaserText,
     avatarUrl: s.avatarUrl,
