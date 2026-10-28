@@ -120,10 +120,17 @@ async function sendMail({ to, subject, text, html }) {
       await cmd(Buffer.from(c.pass).toString('base64'), [235]);
     }
     await cmd(`MAIL FROM:<${cleanAddr(c.from)}>`, [250]);
-    for (const rc of rcpts) await cmd(`RCPT TO:<${rc}>`, [250, 251]);
+    // odrzucenie jednego adresata (np. przez SPF) nie blokuje wysyłki do pozostałych
+    const accepted = [];
+    const rejected = [];
+    for (const rc of rcpts) {
+      try { await cmd(`RCPT TO:<${rc}>`, [250, 251]); accepted.push(rc); } catch (e) { rejected.push(`${rc}: ${e.message}`); }
+    }
+    if (!accepted.length) throw new Error(rejected.join(' | '));
+    if (rejected.length) console.warn('[e-mail] pominięto adresatów:', rejected.join(' | '));
     await cmd('DATA', [354]);
     // linie zaczynające się od kropki trzeba podwoić (dot-stuffing)
-    const body = buildMessage({ from: c.from, to: rcpts, subject, text, html }).replace(/^\./gm, '..');
+    const body = buildMessage({ from: c.from, to: accepted, subject, text, html }).replace(/^\./gm, '..');
     await cmd(body + '\r\n.', [250]);
     socket.write('QUIT\r\n');
   } finally {
