@@ -14,6 +14,15 @@ const cfg = () => ({
   from: process.env.MAIL_FROM || process.env.SMTP_USER || '',
 });
 
+// Serwery poczty wymagają w EHLO pełnej nazwy domeny (np. callback.viaregia.online),
+// a nazwa kontenera na Render nią nie jest.
+function heloName(c) {
+  const fqdn = (h) => /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i.test(h || '') ? h : '';
+  let fromUrl = '';
+  try { fromUrl = new URL(process.env.PUBLIC_URL || '').hostname; } catch { /* brak PUBLIC_URL */ }
+  return fqdn(process.env.SMTP_HELO) || fqdn(fromUrl) || fqdn(os.hostname()) || fqdn(String(c.from).split('@')[1]) || 'localhost.localdomain';
+}
+
 const enabled = () => !!(cfg().host && cfg().from);
 
 // Czyta odpowiedzi serwera SMTP (wieloliniowe „250-…” kończą się linią „250 …”).
@@ -94,7 +103,7 @@ async function sendMail({ to, subject, text, html }) {
   };
   try {
     await cmd(null, [220]);
-    const helo = `EHLO ${os.hostname() || 'callback'}`;
+    const helo = `EHLO ${heloName(c)}`;
     let ehlo = await cmd(helo, [250]);
     if (c.port !== 465) {
       if (!/STARTTLS/i.test(ehlo.text)) throw new Error('SMTP: serwer nie obsługuje STARTTLS');
