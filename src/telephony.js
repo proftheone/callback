@@ -2,6 +2,8 @@
 // Logika połączeń: najpierw dzwonimy do konsultanta, po odebraniu łączymy go z klientem.
 // Bez danych Twilio aplikacja nie dzwoni: zgłoszenia zostają ze statusem „new”.
 const crypto = require('node:crypto');
+const dns = require('node:dns').promises;
+const net = require('node:net');
 const { leads } = require('./db');
 
 const SID = process.env.TWILIO_ACCOUNT_SID;
@@ -14,11 +16,37 @@ const mockMode = !(SID && TOKEN && FROM && PUBLIC_URL);
 
 const xml = (s) => String(s).replace(/[<>&"']/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&apos;' }[c]));
 
+// Webhook ustawia klient, więc nie pozwalamy mu sięgać do sieci wewnętrznej serwera (SSRF).
+function privateIp(ip) {
+  if (net.isIPv4(ip)) {
+    const [a, b] = ip.split('.').map(Number);
+    return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224;
+  }
+  const v = ip.toLowerCase();
+  if (v.startsWith('::ffff:')) return privateIp(v.slice(7));
+  return v === '::' || v === '::1' || v.startsWith('fc') || v.startsWith('fd') || v.startsWith('fe80');
+}
+
+async function isPublicUrl(url) {
+  try {
+    const u = new URL(url);
+    if (!/^https?:$/.test(u.protocol)) return false;
+    const host = u.hostname.replace(/^\[|\]$/g, '');
+    const addrs = net.isIP(host) ? [host] : (await dns.lookup(host, { all: true })).map((a) => a.address);
+    return addrs.length > 0 && !addrs.some(privateIp);
+  } catch {
+    return false;
+  }
+}
+
 async function notifyWebhook(site, lead, event) {
   const url = site.settings.webhookUrl;
   if (!url) return;
   try {
+    if (!(await isPublicUrl(url))) return console.warn('[webhook] pominięty adres wewnętrzny', url);
     await fetch(url, {
+      redirect: 'error',
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ event, site: { id: site.id, name: site.name }, lead }),
@@ -118,7 +146,8 @@ function recording(lead, p) {
 
 // Weryfikacja podpisu X-Twilio-Signature.
 function validSignature(url, params, signature) {
-  if (mockMode) return true;
+  // bez Twilio nikt nie powinien wysyłać tych webhooków, więc odrzucamy wszystkie
+  if (mockMode) return false;
   const data = url + Object.keys(params).sort().map((k) => k + params[k]).join('');
   const expected = crypto.createHmac('sha1', TOKEN).update(data).digest('base64');
   const a = Buffer.from(expected);
@@ -127,4 +156,4 @@ function validSignature(url, params, signature) {
 }
 
 
-module.exports = { mockMode, startCall, agentAnswerTwiml, dialDone, callStatus, recording, validSignature, notifyWebhook, PUBLIC_URL };
+module.exports = { isPublicUrl, mockMode, startCall, agentAnswerTwiml, dialDone, callStatus, recording, validSignature, notifyWebhook, PUBLIC_URL };

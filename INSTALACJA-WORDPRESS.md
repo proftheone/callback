@@ -31,6 +31,7 @@ Pobierz nowy plik zip i wgraj go tak jak przy instalacji. WordPress zapyta **„
 - Hosting: Render, usługa `callback` (Blueprint z repozytorium `proftheone/callback`, plan Starter z dyskiem `/data`). Każdy push do gałęzi `main` wdraża się sam.
 - DNS: w strefie `viaregia.online` (AttHost) rekord `CNAME callback → callback-6dnc.onrender.com.`
 - Zmienne w Render → Environment: `ADMIN_PASSWORD`, `PUBLIC_URL=https://callback.viaregia.online`, `CONTACT_EMAIL`.
+- Powiadomienia e-mail o nowym leadzie: w Render → Environment dodaj `SMTP_HOST`, `SMTP_PORT` (465), `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` (dane skrzynki, np. info@otoneso.pl) oraz `LEAD_NOTIFY_EMAIL=info@otoneso.pl`. Klient może też wpisać własne adresy w panelu: Strony i ustawienia → „E-mail o nowym leadzie”.
 - Prawdziwe połączenia: dodaj `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_NUMBER` (polski numer wymaga Regulatory Bundle z danymi firmy, w *Voice → Geo permissions* włączona Polska). Bez nich aplikacja działa w trybie demo: zbiera zgłoszenia, ale nie dzwoni.
 
 ## Bez WordPressa

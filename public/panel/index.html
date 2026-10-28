@@ -222,6 +222,8 @@
   var STATUS = { new: 'Nowe', calling: 'Łączenie', completed: 'Rozmowa odbyta', scheduled: 'Zaplanowany', missed: 'Klient nie odebrał', agent_missed: 'Konsultant nie odebrał', failed: 'Błąd' };
   var DAYS = [[1, 'Poniedziałek'], [2, 'Wtorek'], [3, 'Środa'], [4, 'Czwartek'], [5, 'Piątek'], [6, 'Sobota'], [0, 'Niedziela']];
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // tylko adresy http(s) mogą trafić do href, żeby link „javascript:” nie wykonał kodu
+  function safeUrl(u) { return /^https?:\/\//i.test(String(u || '')) ? String(u) : ''; }
   function fmtDate(s) { return s ? new Date(s.includes('T') ? s : s.replace(' ', 'T') + 'Z').toLocaleString('pl-PL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''; }
   function fmtDur(s) { if (!s) return '—'; var m = Math.floor(s / 60); return (m ? m + ' min ' : '') + (s % 60) + ' s'; }
 
@@ -332,10 +334,10 @@
         var src = l.utm_source || (l.referrer ? (function () { try { return new URL(l.referrer).hostname; } catch (e) { return l.referrer; } })() : 'bezpośrednio');
         return '<tr><td>' + fmtDate(l.created_at) + (l.scheduled_at && l.status === 'scheduled' ? '<br><span class="muted">→ ' + fmtDate(l.scheduled_at) + '</span>' : '') + '</td>' +
           '<td><a href="tel:' + esc(l.phone) + '">' + esc(l.phone) + '</a>' + (l.name ? '<br><span class="muted">' + esc(l.name) + '</span>' : '') + '</td>' +
-          '<td><span class="badge b-' + l.status + '">' + (STATUS[l.status] || l.status) + '</span>' + (l.attempts > 1 ? ' <span class="muted">×' + l.attempts + '</span>' : '') + '</td>' +
+          '<td><span class="badge b-' + esc(l.status) + '">' + esc(STATUS[l.status] || l.status) + '</span>' + (l.attempts > 1 ? ' <span class="muted">×' + l.attempts + '</span>' : '') + '</td>' +
           '<td>' + esc(l.site_name) + '</td>' +
           '<td>' + esc(src) + (l.utm_campaign ? '<br><span class="muted">' + esc(l.utm_campaign) + '</span>' : '') + '</td>' +
-          '<td>' + fmtDur(l.call_duration) + (l.recording_url ? '<br><a href="' + esc(l.recording_url) + '" target="_blank">nagranie</a>' : '') + '</td>' +
+          '<td>' + fmtDur(l.call_duration) + (safeUrl(l.recording_url) ? '<br><a href="' + esc(safeUrl(l.recording_url)) + '" target="_blank" rel="noopener">nagranie</a>' : '') + '</td>' +
           '<td>' + esc(l.tag || '') + '</td>' +
           '<td><button class="s" data-lead="' + l.id + '">Szczegóły</button></td></tr>';
       }).join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:40px">Brak leadów. Wypróbuj widget na stronie podglądu (zakładka „Strony i ustawienia”).</td></tr>';
@@ -352,7 +354,7 @@
     state.currentLead = l;
     $('#dlgTitle').textContent = l.phone + (l.name ? ' · ' + l.name : '');
     $('#dlgMeta').innerHTML = 'Status: <b>' + (STATUS[l.status] || l.status) + '</b><br>Zgłoszenie: ' + fmtDate(l.created_at) +
-      (l.page_url ? '<br>Strona: <a href="' + esc(l.page_url) + '" target="_blank">' + esc(l.page_url.slice(0, 70)) + '</a>' : '') +
+      (safeUrl(l.page_url) ? '<br>Strona: <a href="' + esc(safeUrl(l.page_url)) + '" target="_blank" rel="noopener">' + esc(l.page_url.slice(0, 70)) + '</a>' : '') +
       '<br>Wyzwalacz: ' + esc(l.trigger || 'button') + ' · Próby: ' + l.attempts;
     $('#dlgStatus').innerHTML = Object.keys(STATUS).map(function (k) { return '<option value="' + k + '"' + (l.status === k ? ' selected' : '') + '>' + STATUS[k] + '</option>'; }).join('');
     $('#dlgTag').value = l.tag || '';
@@ -423,6 +425,7 @@
         '<label>Exit intent</label><input type="checkbox" data-k="exitIntent"' + (st.exitIntent ? ' checked' : '') + '>' +
         '<label>Nagrywaj rozmowy</label><input type="checkbox" data-k="recordCalls"' + (st.recordCalls ? ' checked' : '') + '>' +
         f('Liczba prób', 'maxAttempts', st.maxAttempts, 'number', true) +
+        f('E-mail o nowym leadzie (po przecinku; puste = e-mail konta)', 'notifyEmail', st.notifyEmail || '', '', true) +
         f('Webhook (CRM, Zapier…)', 'webhookUrl', st.webhookUrl || '', 'url', true) +
         '</div><h4>Godziny pracy (' + esc(st.timezone) + ')</h4><div class="hours">' +
         DAYS.map(function (d) { var h = st.hours[d[0]]; return '<span>' + d[1] + '</span><input type="checkbox" data-day="' + d[0] + '"' + (h ? ' checked' : '') + '><input type="time" data-from="' + d[0] + '" value="' + (h ? h[0] : '09:00') + '"><input type="time" data-to="' + d[0] + '" value="' + (h ? h[1] : '17:00') + '">'; }).join('') +
