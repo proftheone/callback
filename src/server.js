@@ -521,6 +521,11 @@ route('PATCH', '/api/admin/leads/:id', panel(async (req, res, { id }, _, ctx) =>
   }
   send(res, 200, leads.update(Number(id), allowed));
 }));
+route('DELETE', '/api/admin/leads/:id', panel((req, res, { id }, _, ctx) => {
+  if (!ownsLead(ctx, leads.byId(Number(id)))) return send(res, 404, { error: 'Nie znaleziono' });
+  leads.remove(Number(id));
+  send(res, 204, '');
+}));
 route('POST', '/api/admin/leads/:id/call', panel(async (req, res, { id }, _, ctx) => {
   const lead = leads.byId(Number(id));
   if (!ownsLead(ctx, lead)) return send(res, 404, { error: 'Nie znaleziono' });

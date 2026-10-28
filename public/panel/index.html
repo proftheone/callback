@@ -54,6 +54,8 @@
   button.s,a.s{background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
   button.s:hover,a.s:hover{border-color:#3a3a46}
   button:disabled{opacity:.4;cursor:default}
+  button.trash{background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:999px;width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;cursor:pointer;padding:0}
+  button.trash:hover{color:var(--bad);border-color:rgba(239,68,68,.5)}
   button.d{background:transparent;color:var(--bad);border:1px solid rgba(239,68,68,.35);border-radius:999px;padding:8px 16px;font:inherit;font-weight:600;cursor:pointer}
   .muted{color:var(--muted)}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -207,7 +209,7 @@
   <label class="muted">Notatki</label>
   <textarea id="dlgNotes" style="margin:4px 0 12px;min-height:100px"></textarea>
   <div style="display:flex;gap:8px;justify-content:space-between">
-    <button class="s" id="dlgCall">☎ Zadzwoń ponownie</button>
+    <span><button class="s" id="dlgCall">☎ Zadzwoń ponownie</button> <button class="d" id="dlgDelete">Usuń lead</button></span>
     <span><button class="s" id="dlgClose">Anuluj</button> <button class="p" id="dlgSave">Zapisz</button></span>
   </div>
 </dialog>
@@ -418,16 +420,25 @@
           '<td>' + esc(src) + (l.utm_campaign ? '<br><span class="muted">' + esc(l.utm_campaign) + '</span>' : '') + '</td>' +
           '<td>' + fmtDur(l.call_duration) + (safeUrl(l.recording_url) ? '<br><a href="' + esc(safeUrl(l.recording_url)) + '" target="_blank" rel="noopener">nagranie</a>' : '') + '</td>' +
           '<td>' + esc(l.tag || '') + '</td>' +
-          '<td><button class="s" data-lead="' + l.id + '">Szczegóły</button></td></tr>';
+          '<td style="white-space:nowrap"><button class="s" data-lead="' + l.id + '">Szczegóły</button> <button class="trash" data-del-lead="' + l.id + '" title="Usuń lead" aria-label="Usuń lead"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg></button></td></tr>';
       }).join('') || '<tr><td colspan="8" class="muted" style="text-align:center;padding:40px">Brak leadów. Wypróbuj widget na stronie podglądu (zakładka „Strony i ustawienia”).</td></tr>';
       $('#onboarding').classList.toggle('hide', !!d.total || OWNER || !!$('#q').value || !!$('#statusFilter').value);
       $('#pageInfo').textContent = d.total ? (state.offset + 1) + '–' + Math.min(state.offset + state.limit, d.total) + ' z ' + d.total : '';
       $('#prev').disabled = state.offset === 0;
       $('#next').disabled = state.offset + state.limit >= d.total;
       document.querySelectorAll('[data-lead]').forEach(function (b) { b.addEventListener('click', function () { openLead(leadCache[b.dataset.lead]); }); });
+      document.querySelectorAll('[data-del-lead]').forEach(function (b) { b.addEventListener('click', function () { deleteLead(leadCache[b.dataset.delLead]); }); });
     });
   }
   setInterval(function () { if (state.tab === 'leads' && token && !$('#leadDlg').open) loadLeads().catch(function () {}); }, 5000);
+
+  function deleteLead(l) {
+    if (!l || !confirm('Usunąć lead ' + l.phone + '? Tej operacji nie można cofnąć.')) return;
+    api('/api/admin/leads/' + l.id, { method: 'DELETE' }).then(function () {
+      if ($('#leadDlg').open) $('#leadDlg').close();
+      loadLeads(); checkNew();
+    });
+  }
 
   function openLead(l) {
     state.currentLead = l;
@@ -440,6 +451,7 @@
     $('#dlgNotes').value = l.notes || '';
     $('#leadDlg').showModal();
   }
+  $('#dlgDelete').addEventListener('click', function () { deleteLead(state.currentLead); });
   $('#dlgClose').addEventListener('click', function () { $('#leadDlg').close(); });
   $('#dlgSave').addEventListener('click', function () {
     api('/api/admin/leads/' + state.currentLead.id, { method: 'PATCH', body: JSON.stringify({ status: $('#dlgStatus').value, tag: $('#dlgTag').value, notes: $('#dlgNotes').value }) })

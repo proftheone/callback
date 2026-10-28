@@ -164,6 +164,7 @@ const leads = {
     return leads.byId(r.lastInsertRowid);
   },
   byId: (id) => db.prepare('SELECT * FROM leads WHERE id = ?').get(id),
+  remove: (id) => db.prepare('DELETE FROM leads WHERE id = ?').run(id),
   bySid: (sid) => db.prepare('SELECT * FROM leads WHERE call_sid = ?').get(sid),
   update(id, data) {
     const cols = LEAD_FIELDS.filter((f) => data[f] !== undefined);

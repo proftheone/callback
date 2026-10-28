@@ -51,6 +51,7 @@ const adm = { authorization: `Bearer ${ADMIN}` };
   const la = (await req('GET', '/api/admin/leads', { headers: A })).json;
   check('Klient A nie widzi leadów klienta B', la.rows.every((l) => l.site_id !== siteB.id));
   check('Klient A nie zmieni leada klienta B', (await req('PATCH', `/api/admin/leads/${lidB}`, { headers: A, body: { notes: 'x' } })).status === 404);
+  check('Klient A nie usunie leada klienta B', (await req('DELETE', `/api/admin/leads/${lidB}`, { headers: A })).status === 404);
   check('Klient A nie zmieni strony klienta B', (await req('PUT', `/api/admin/sites/${siteB.id}`, { headers: A, body: { name: 'x' } })).status === 404);
   check('Klient A nie usunie strony klienta B', (await req('DELETE', `/api/admin/sites/${siteB.id}`, { headers: A })).status === 404);
   check('Klient nie ma dostępu do listy kont', (await req('GET', '/api/admin/accounts', { headers: A })).status === 403);
