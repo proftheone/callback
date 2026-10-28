@@ -38,6 +38,7 @@
   td a{color:var(--text);text-decoration:none;font-weight:600}
   .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;border:1px solid transparent}
   .b-completed{background:rgba(34,197,94,.12);color:#4ade80;border-color:rgba(34,197,94,.3)}
+  .nbadge{display:inline-block;min-width:18px;padding:1px 6px;border-radius:999px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;line-height:16px;text-align:center;margin-left:4px}
   .b-calling,.b-new{background:rgba(124,58,237,.12);color:var(--brand2);border-color:rgba(124,58,237,.35)}
   .b-scheduled{background:rgba(168,85,247,.12);color:#c084fc;border-color:rgba(168,85,247,.3)}
   .b-missed,.b-agent_missed{background:rgba(245,158,11,.12);color:#fbbf24;border-color:rgba(245,158,11,.3)}
@@ -104,13 +105,14 @@
   <header>
     <span class="logo"><i>☎</i>Callback</span>
     <nav>
-      <button data-tab="leads" class="active">Leady</button>
+      <button data-tab="leads" class="active">Leady <span id="newBadge" class="nbadge hide"></span></button>
       <button data-tab="stats">Statystyki</button>
       <button data-tab="sites">Strony i ustawienia</button>
       <button data-tab="accounts" class="hide" id="accountsTab">Klienci</button>
       <button data-tab="account" class="hide" id="accountTab">Konto</button>
     </nav>
     <span class="sp"></span>
+    <button class="s" id="notifyBtn" style="white-space:nowrap" title="Powiadomienia o nowych leadach">🔔 Włącz powiadomienia</button>
     <span id="who" class="muted" style="white-space:nowrap"></span>
     <select id="siteFilter"></select>
     <button class="s" id="logout">Wyloguj</button>
@@ -283,8 +285,85 @@
   });
   document.querySelectorAll('[data-go]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); show(a.dataset.go); }); });
 
+  // ---------- powiadomienia o nowych leadach ----------
+  // Licznik „Nowe” w tytule karty i na ikonie karty, plus powiadomienie systemowe i dźwięk,
+  // gdy pojawi się nowe zgłoszenie. Działa, dopóki karta z panelem jest otwarta (także w tle).
+  var watch = { timer: null, lastId: null, key: 'cb_last_lead_' + (OWNER ? 'owner' : 'client') };
+  var baseTitle = document.title;
+  function drawIcon(n) {
+    var c = document.createElement('canvas'); c.width = c.height = 64;
+    var x = c.getContext('2d');
+    x.fillStyle = '#7C3AED'; x.beginPath(); x.arc(32, 32, 30, 0, Math.PI * 2); x.fill();
+    x.fillStyle = '#fff'; x.font = 'bold 34px sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('☎', 32, 34);
+    if (n > 0) {
+      x.fillStyle = '#ef4444'; x.beginPath(); x.arc(46, 18, 18, 0, Math.PI * 2); x.fill();
+      x.fillStyle = '#fff'; x.font = 'bold 24px sans-serif'; x.fillText(n > 99 ? '99' : String(n), 46, 19);
+    }
+    var link = document.querySelector('link[rel=icon]') || document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'icon' }));
+    link.href = c.toDataURL('image/png');
+  }
+  function beep() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.18].forEach(function (t) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.value = 880; o.connect(g); g.connect(ctx.destination);
+        g.gain.setValueAtTime(0.15, ctx.currentTime + t); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.15);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.16);
+      });
+    } catch (e) { /* przeglądarka bez dźwięku */ }
+  }
+  function notifyState() {
+    var b = $('#notifyBtn');
+    if (!('Notification' in window)) { b.classList.add('hide'); return; }
+    var p = Notification.permission;
+    b.textContent = p === 'granted' ? '🔔 Włączone' : p === 'denied' ? '🔕 Zablokowane' : '🔔 Włącz powiadomienia';
+    b.disabled = p !== 'default';
+    b.title = p === 'denied' ? 'Odblokuj powiadomienia dla tej strony w ustawieniach przeglądarki (ikona kłódki obok adresu).' : 'Powiadomienia o nowych leadach';
+  }
+  $('#notifyBtn').addEventListener('click', function () {
+    Notification.requestPermission().then(function () {
+      notifyState();
+      if (Notification.permission === 'granted') new Notification('Powiadomienia włączone', { body: 'Damy znać, gdy pojawi się nowy lead.' });
+    });
+  });
+  function announce(l) {
+    beep();
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    var n = new Notification('Nowy lead: ' + l.phone, { body: (l.site_name || '') + (l.page_url ? '\n' + l.page_url : ''), tag: 'lead-' + l.id, requireInteraction: true });
+    n.onclick = function () { window.focus(); show('leads'); n.close(); };
+  }
+  function checkNew() {
+    if (!token) return;
+    fetch('/api/admin/leads?status=new&limit=20', { headers: { authorization: 'Bearer ' + token } })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        var n = d.total || 0;
+        document.title = (n ? '(' + n + ') ' : '') + baseTitle;
+        drawIcon(n);
+        $('#newBadge').textContent = n; $('#newBadge').classList.toggle('hide', !n);
+        var maxId = d.rows.reduce(function (m, l) { return Math.max(m, l.id); }, 0);
+        var last = watch.lastId != null ? watch.lastId : Number(localStorage.getItem(watch.key) || 0);
+        if (watch.lastId != null || last) {
+          d.rows.filter(function (l) { return l.id > last; }).reverse().forEach(announce);
+          if (d.rows.some(function (l) { return l.id > last; }) && state.tab === 'leads' && !$('#leadDlg').open) loadLeads().catch(function () {});
+        }
+        watch.lastId = Math.max(last, maxId);
+        try { localStorage.setItem(watch.key, String(watch.lastId)); } catch (e) { /* tryb prywatny */ }
+      }).catch(function () {});
+  }
+  function startWatch() {
+    notifyState();
+    drawIcon(0);
+    clearInterval(watch.timer);
+    checkNew();
+    watch.timer = setInterval(checkNew, 15000);
+  }
+
   function start() {
     $('#login').classList.add('hide'); $('#app').classList.remove('hide');
+    startWatch();
     api('/api/admin/info').then(function (i) {
       state.info = i;
       $('#mock').classList.toggle('hide', !i.mockMode);
@@ -364,7 +443,7 @@
   $('#dlgClose').addEventListener('click', function () { $('#leadDlg').close(); });
   $('#dlgSave').addEventListener('click', function () {
     api('/api/admin/leads/' + state.currentLead.id, { method: 'PATCH', body: JSON.stringify({ status: $('#dlgStatus').value, tag: $('#dlgTag').value, notes: $('#dlgNotes').value }) })
-      .then(function () { $('#leadDlg').close(); loadLeads(); });
+      .then(function () { $('#leadDlg').close(); loadLeads(); checkNew(); });
   });
   $('#dlgCall').addEventListener('click', function () {
     api('/api/admin/leads/' + state.currentLead.id + '/call', { method: 'POST' }).then(function () { $('#leadDlg').close(); loadLeads(); });
